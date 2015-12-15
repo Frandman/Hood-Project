@@ -22,7 +22,6 @@
 					<div id="location-links" class="row">
 						<ul id="nav" data-bind="foreach: locations">
 							<li class="col-xs-12" data-bind="text: title, click: updateInfoWindow" ></li>
-							<li data-bind="text: description"></li>
 						</ul>
 					</div>
 					<div id="info-window" class="row">
@@ -30,6 +29,7 @@
 							<h2>Location Information</h2>
 							<h3 data-bind="text: currentLoc().title"></h3>
 							<span data-bind="text: currentLoc().description"></span>
+							<img data-bind="attr: { src: currentLoc().img_url }">
 						</div>
 					</div>
 				</div>
@@ -44,7 +44,7 @@
 	    	</div>
 	    </footer>
 	    <script async defer
-	      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDfr-U34sxOCt5uvZ51YdGrBcU1C2Va3KE&callback=initMap">
+	      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDfr-U34sxOCt5uvZ51YdGrBcU1C2Va3KE&libraries=places&callback=initMap">
 	    </script>
 	    <script type="text/javascript" src="js/script.js"></script>
 	</body>

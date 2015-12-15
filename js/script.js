@@ -16,8 +16,9 @@ function Loc (data) {
 	this.city = ko.observable("Madrid");
 	this.country = ko.observable("Spain");
 	this.type = ko.observable(types[data.type]);
-	this.description = "";
+	this.description = ko.observable();
 	this.urlinfo = "";
+	this.img_url = ko.observable();
 	wikiInfoRequest(this);
 };
 
@@ -42,7 +43,7 @@ locationsData =[
 
 var ViewModel = function () {
 	self = this;
-
+	var request = {};
 	self.locations = ko.observableArray();
 
 	for (var i =0; i < locationsData.length; i++){
@@ -59,32 +60,29 @@ var ViewModel = function () {
 
 	updateInfoWindow = function(loc){
 		self.currentLoc(this);
+		request.query = this.title();
+		service(this, request);
 	}
 
 };
 
 
 wikiInfoRequest = function (Loc){
-	console.log("Call");
 	_url = "https://es.wikipedia.org/w/api.php?action=opensearch&search="+Loc.title()+"&format=json&callback=wikiCallback";
 	$.ajax({
   		url: _url,
   		dataType: "jsonp"
 		}).done(function(res){
-			Loc.description = res[2][0];
+			Loc.description(res[2][0]);
 			Loc.urlinfo= res[3][0];
 	});
 }
 
-googlePlacesRequest = function(){
-	google_api_key = "AIzaSyDfr-U34sxOCt5uvZ51YdGrBcU1C2Va3KE";
-	query = "torres+colon+,+Madrid";
-	base_place_url = "https://maps.googleapis.com/maps/api/place/textsearch/json?query="+query+"&key="+google_api_key;
-	//base_img_url = "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference="+photoreference+"&key="+google_api_key;
-
-	$.get( base_place_url, function( res ) {
-  	console.log(res);
+function service(Loc,request){
+	var service = new google.maps.places.PlacesService(map);
+	service.textSearch(request, function(res){
+		Loc.img_url = res[0].photos[0].getUrl({'maxWidth': 400, 'maxHeight': 1000});
 	});
-}();
+}
 
 ko.applyBindings(new ViewModel());
