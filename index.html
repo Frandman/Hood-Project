@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Awesome</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" type="text/css" href="css/styles.css">
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+		<script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/knockout-3.4.0.js"></script>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div id="header" class="col-xs-12">
+					<h1>MY FAVOURITE LOCATIONS</h1>
+				</div>
+			</div>
+			<div id="content" class="row">
+				<div id="locations-list" class="col-sm-3">
+					<div id="location-links" class="row">
+						<ul id="nav" data-bind="foreach: locations">
+							<li class="col-xs-12" data-bind="text: title, click: updateInfoWindow" ></li>
+							<li data-bind="text: description"></li>
+						</ul>
+					</div>
+					<div id="info-window" class="row">
+						<div class"col-xs-12">
+							<h2>Location Information</h2>
+							<h3 data-bind="text: currentLoc().title"></h3>
+							<span data-bind="text: currentLoc().description"></span>
+						</div>
+					</div>
+				</div>
+				<div id="map" class="col-sm-8"></div>
+			</div>
+		</div>
+	    <footer>
+	    	<div class="row">
+	    		<div id="footer" class="col-xs-12">
+	    			<span>awesome footer</span>
+	    		</div>
+	    	</div>
+	    </footer>
+	    <script async defer
+	      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDfr-U34sxOCt5uvZ51YdGrBcU1C2Va3KE&callback=initMap">
+	    </script>
+	    <script type="text/javascript" src="js/script.js"></script>
+	</body>
+</html>
