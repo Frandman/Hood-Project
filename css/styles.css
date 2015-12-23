@@ -2,13 +2,15 @@
 #map {
 	height: 400px;
 }
-
+input {
+	width: 93%;
+}
 ul {
 	margin: 0;
 	padding: 0;
 }
 
-#nav > li {
+#locations > li {
 	list-style-type: none;
 	margin-bottom: 1em;
 	background-color: rgba(191, 187, 187, 0.08);
@@ -32,4 +34,32 @@ footer {
 	margin-right: 1%;
 	margin-bottom: 1%;
 }
+
+#description {
+	margin-bottom: 1em;
+}
+
+.img-responsive {
+	margin: 0 auto;
+}
+
+.container.infowindow {
+	width: 400px;
+    text-align: center;
+}
+
+.row.iw-description {
+	margin-top: 5%;
+}
+
+iframe {
+	width: 80%;
+}
+
+@media screen and (max-width: 780px) {
+	iframe {
+		display: none;
+	}
+}
+
 

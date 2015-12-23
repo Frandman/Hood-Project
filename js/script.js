@@ -1,28 +1,36 @@
 var map;
-
+var infowindow;
+var markers=[];
 /* Map Loader Function */
 
 function initMap() {
-	map = new google.maps.Map(document.getElementById('map'), {
-    center: {lat: 40.425884, lng: -3.68783},
-    zoom: 14
-  });
-	this.loadImgInfo();
+  		map = new google.maps.Map(document.getElementById('map'), {
+    	center: {lat: 40.425884, lng: -3.68783},
+   		zoom: 13
+  	});
+  	infowindow = new google.maps.InfoWindow;
+  	ko.applyBindings(new ViewModel());
 }
 
-/* Location Model */
+/* Location Constructor */
 
 function Loc (data) {
-	this.title = ko.observable(data.name);
-	this.latlng = ko.observable(data.latlng);
-	this.city = ko.observable("Madrid");
-	this.country = ko.observable("Spain");
-	this.type = ko.observable(types[data.type]);
-	this.description = ko.observable();
-	this.urlinfo = "";
-	this.img_url = ko.observable();
-	wikiInfoRequest(this);
-};
+	var self = this;
+	self.title = ko.observable(data.name);
+	self.latlng = ko.observable(data.latlng);
+	self.city = ko.observable("Madrid");
+	self.country = ko.observable("Spain");
+	self.type = ko.observable(types[data.type]);
+	self.description = ko.observable();
+	self.urlinfo = ko.observable();
+	self.img_url = ko.observable();
+	self.map = map;
+	self.contentString = ko.observable();
+	wikiInfoRequest(self);
+	request = {};
+	request.query = data.name;
+	loadLocImg(self, request);
+}
 
 /* types */
 
@@ -34,27 +42,27 @@ locationsData =[
 
 	{'type': '1',
 	 'name': 'Torres de Colon',
-	 'latlng':{lat: -34.397, lng: 150.644}
+	 'latlng':{lat: 40.4255386, lng: -3.6931735}
 	},
 
 	{'type': '2',
 	 'name': 'Museo del Prado',
-	 'latlng':{lat: -34.397, lng: 150.644}
+	 'latlng':{lat: 40.4137818, lng: -3.6943211}
 	},
 
 	{'type': '3',
 	 'name': 'Puerta del Sol',
-	 'latlng':{lat: -3.70, lng: 40.41}
+	 'latlng':{lat: 40.4169473, lng: -3.7035285}
 	},
 
 	{'type': '3',
 	 'name': 'Faro Moncloa',
-	 'latlng':{lat: -3.70, lng: 40.41}
+	 'latlng':{lat: 40.4372767, lng: -3.7237375}
 	},
 
 	{'type': '3',
 	 'name': 'Parque de el Retiro',
-	 'latlng':{lat: -3.70, lng: 40.41}
+	 'latlng':{lat: 40.4152606, lng: -3.6866935}
 	},
 ];
 
@@ -62,9 +70,9 @@ locationsData =[
 
 var ViewModel = function () {
 
-	self = this;
+	var self = this;
+	self.query = ko.observable("");
 	self.locations = ko.observableArray();
-
 	for (var i =0; i < locationsData.length; i++){
 		self.locations.push(new Loc(locationsData[i]));
 	}
@@ -77,22 +85,27 @@ var ViewModel = function () {
 
 	self.currentLoc = ko.observable(self.locations()[0]);
 
-	loadImgInfo = function(){
-		var loc;
-		var request = {};
-		loc = self.locations()[0]
-		request.query = loc.title();
-		service(loc, request);
+	updateInfoWindow = function(loc){
+		self.currentLoc(loc);
+		if (infowindow){
+			infowindow.close();
+		}
+		infowindow.setContent(loc.contentString());
+		infowindow.open(map, loc.marker);
 	}
 
-	updateInfoWindow = function(loc){
-		var request = {};
-		self.currentLoc(loc);
-		request.query = loc.title();
-		service(loc, request);
-	}
+	self.search = ko.computed(function() {
+    	return ko.utils.arrayFilter(self.locations(), function(location) {
+    		return location.title().toLowerCase().indexOf(self.query().toLowerCase()) >= 0;
+        });
+    });
+
+    self.search.subscribe(function() {
+        setVisibilty(self.search());
+    });
 };
 
+/* Load wikipedia Info */
 
 wikiInfoRequest = function (loc){
 	_url = "https://es.wikipedia.org/w/api.php?action=opensearch&search="+loc.title()+"&format=json&callback=wikiCallback";
@@ -100,16 +113,77 @@ wikiInfoRequest = function (loc){
   		url: _url,
   		dataType: "jsonp"
 		}).done(function(res){
-			loc.description(res[2][0]);
-			loc.urlinfo= res[3][0];
+			if(res[2][0]) {
+				loc.description(res[2][0]);
+				loc.urlinfo(res[3][0]);
+				console.log(res);
+			}
+
+			else {
+				loc.description('Unable to retrieve wikipedia information');
+			}
 	});
 }
 
-function service(loc,request){
+/* Load Images from Google Maps API */
+
+function loadLocImg(loc,request){
 	var service = new google.maps.places.PlacesService(map);
 	service.textSearch(request, function(res){
-		loc.img_url(res[0].photos[0].getUrl({'maxWidth': 400, 'maxHeight': 400}));
+		if (res){
+			url = res[0].photos[0].getUrl({'maxWidth': 200, 'maxHeight': 200});
+			loc.img_url(url);
+			loc.contentString('<div class="container infowindow">'+
+									'<div class="row iw-title">'+
+							       		'<h1>'+loc.title()+'</h1>'+
+							       	'</div>'+
+							       	'<div class="row">'+
+							        	'<img class="img-responsive" src="'+url+'">'+
+							        '</div>'+
+							        '<div class="row iw-description">'+
+							        	'<p>'+loc.description()+'</p>'+
+							        '</div>'+
+							   '</div>');
+		}
+
+		else {
+			loc.img_url('img/error.png');
+			loc.contentString('<h1>Error retrieving location info</h1>');
+		};
+
+		loc.infowindow = new google.maps.InfoWindow({
+	    		content: loc.contentString()
+	    });
+
+    	loc.marker = new google.maps.Marker({
+    		position: loc.latlng(),
+    		map: map,
+    		title: loc.title()
+  		});
+
+		loc.marker.addListener("click", function(){
+			loc.infowindow.open(map, loc.marker);
+			this.setAnimation(google.maps.Animation.BOUNCE);
+		})
+		markers.push(loc.marker);
 	});
 }
 
-ko.applyBindings(new ViewModel());
+
+var setVisibilty = function(filteredLocations) {
+    for (var i = 0; i < markers.length; i++) {
+        for (var j = 0; j < filteredLocations.length; j++) {
+            var filteredMark = filteredLocations[j];
+            if (filteredMark.title() === markers[i].title) {
+                markers[i].setVisible(true);
+                break;
+
+            } else {
+                markers[i].setVisible(false);
+            }
+        }
+    }
+};
+
+
+

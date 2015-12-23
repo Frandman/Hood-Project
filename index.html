@@ -14,28 +14,43 @@
 		<div class="container">
 			<div class="row">
 				<div id="header" class="col-xs-12">
-					<h1>MY FAVOURITE LOCATIONS</h1>
+					<h1>MY FAVOURITE MADRID LOCATIONS</h1>
 				</div>
 			</div>
+			<div class="search row">
+				<div class="col-xs-12">
+        			<form role="search">
+          				<input id="search-box" type="search" data-bind="textInput: query, valueUpdate: 'keyup'" placeholder="Enter Search"></input>
+        			</form>
+        		</div>
+      		</div>
 			<div id="content" class="row">
 				<div id="locations-list" class="col-sm-3">
-					<div id="location-links" class="row">
-						<ul id="nav" data-bind="foreach: locations">
-							<li class="col-xs-12" data-bind="text: title, click: updateInfoWindow" ></li>
-						</ul>
-					</div>
-					<div id="info-window" class="row">
-						<div class"col-xs-12">
-							<h2>Location Information</h2>
-							<h3 data-bind="text: currentLoc().title"></h3>
-							<span data-bind="text: currentLoc().description"></span>
-							<img class="img-responsive"data-bind="attr: { src: currentLoc().img_url }">
-						</div>
-					</div>
+       				<div class="list">
+          				<ul id="locations" data-bind="foreach: search()">
+            				<li data-bind="text: title, click: updateInfoWindow"></li>
+         				</ul>
+       				</div>
 				</div>
 				<div id="map" class="col-sm-8"></div>
 			</div>
-		</div>
+			<div id="info-window" class="row">
+				<div class"col-xs-12">
+					<h2>Location Information</h2>
+					<h3 data-bind="text: currentLoc().title"></h3>
+					<div id="description">
+						<span data-bind="text: currentLoc().description"></span>
+					</div>
+						<img class="img-responsive" data-bind="attr: { src: currentLoc().img_url }">
+					</div>
+				</div>
+
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-xs-offset-1">
+					<iframe data-bind="attr: { src: currentLoc().urlinfo }"></iframe>
+				</div>
+			</div>
 	    <footer>
 	    	<div class="row">
 	    		<div id="footer" class="col-xs-12">
