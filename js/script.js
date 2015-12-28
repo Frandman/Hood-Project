@@ -1,5 +1,5 @@
 
-'use strict'
+'use strict';
 
 /* Variable initialization */
 
@@ -11,132 +11,127 @@ var locationsData;
 /* Map Loader Function */
 
 function initMap() {
-  		map = new google.maps.Map(document.getElementById('map'), {
-    	center: {lat: 40.425884, lng: -3.68783},
-   		zoom: 12
-  	});
-
-  	infowindow = new google.maps.InfoWindow;
-  	ko.applyBindings(new ViewModel());
+        map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 40.425884, lng: -3.68783},
+        zoom: 12
+    });
+        infowindow = new google.maps.InfoWindow();
+        ko.applyBindings(new ViewModel());
 }
 
 /* Location Constructor */
 
 function Loc (data) {
-	var self = this;
-	self.title = ko.observable(data.name);
-	self.latlng = ko.observable(data.latlng);
-	self.city = ko.observable("Madrid");
-	self.country = ko.observable("Spain");
-	self.type = ko.observable(types[data.type]);
-	self.description = ko.observable();
-	self.urlinfo = ko.observable();
-	self.img_small = ko.observable();
-	self.img_large = ko.observable();
-	self.map = map;
-	self.contentString = ko.observable();
-	wikiInfoRequest(self);
-	var request = {};
-	request.query = data.name;
-	loadLocImg(self, request);
+    var self = this;
+    self.title = ko.observable(data.name);
+    self.latlng = ko.observable(data.latlng);
+    self.city = ko.observable("Madrid");
+    self.country = ko.observable("Spain");
+    self.type = ko.observable(types[data.type]);
+    self.request = ko.computed(function(){
+    	return {query: data.name}
+    });
+    self.description = ko.observable();
+    self.urlinfo = ko.observable();
+    self.img_small = ko.observable();
+    self.img_large = ko.observable();
+    self.map = map;
+    self.contentString = ko.observable();
 }
 
 /* types */
 
-var types ={'1':'Museum','2':'Building','3':'Square'};
+var types = {'1':'Museum','2':'Building','3':'Square'};
 
 /* Hardcoded Data */
 
 locationsData =[
 
-	{'type': '1',
-	 'name': 'Torres de Colon',
-	 'latlng':{lat: 40.4255386, lng: -3.6931735}
-	},
+    {'type': '1',
+    'name': 'Torres de Colon',
+    'latlng':{lat: 40.4255386, lng: -3.6931735}
+    },
 
-	{'type': '2',
-	 'name': 'Museo del Prado',
-	 'latlng':{lat: 40.4137818, lng: -3.6943211}
-	},
+    {'type': '2',
+    'name': 'Museo del Prado',
+    'latlng':{lat: 40.4137818, lng: -3.6943211}
+    },
 
-	{'type': '3',
-	 'name': 'Estación de Atocha',
-	 'latlng':{lat: 40.4372767, lng: -3.7237375}
-	},
+    {'type': '3',
+    'name': 'Estación de Atocha',
+    'latlng':{lat: 40.4372767, lng: -3.7237375}
+    },
 
-	{'type': '3',
-	 'name': 'Museo del romanticismo',
-	 'latlng':{lat: 40.4259033, lng: -3.70096}
-	},
+    {'type': '3',
+    'name': 'Museo del romanticismo',
+    'latlng':{lat: 40.4259033, lng: -3.70096}
+    },
 
-	{'type': '3',
-	 'name': 'Plaza de Castilla',
-	 'latlng':{lat: 40.4657783, lng: -3.6908562}
-	},
+    {'type': '3',
+    'name': 'Plaza de Castilla',
+    'latlng':{lat: 40.4657783, lng: -3.6908562}
+    },
 ];
 
 /* Octopus */
 
 var ViewModel = function () {
 
-	var self = this;
-	self.query = ko.observable("");
-	self.locations = ko.observableArray();
-	for (var i =0; i < locationsData.length; i++){
-		self.locations.push(new Loc(locationsData[i]));
-	}
-
-	self.types = ko.observableArray();
-
-	for (var i = 1; i <= Object.keys(types).length; i++) {
-		self.types.push(types[i]);
-	}
-
-	self.currentLoc = ko.observable(self.locations()[0]);
+    var self = this;
+    self.query = ko.observable("");
+    self.locations = ko.observableArray();
+    for (var i =0; i < locationsData.length; i++){
+        self.locations.push(new Loc(locationsData[i]));
+        wikiInfoRequest(self.locations()[i]);
+    }
+    self.types = ko.observableArray();
+    for (var i = 1; i <= Object.keys(types).length; i++) {
+        self.types.push(types[i]);
+    }
+    self.currentLoc = ko.observable(self.locations()[0]);
 
 	/* Update information and open infowindow */
 
-	self.updateInfoWindow = function(loc){
-		self.currentLoc(loc);
-		if (infowindow){
-			infowindow.close();
-		}
-		infowindow.setContent(loc.contentString());
-		infowindow.open(map, loc.marker);
-		toggleAnimation(loc.marker);
+    self.updateInfoWindow = function(loc){
+    	self.currentLoc(loc);
+    	if (infowindow){
+    		infowindow.close();
+    	}
+    	infowindow.setContent(loc.contentString());
+    	infowindow.open(map, loc.marker);
+    	toggleAnimation(loc.marker);
+    }
 
-	}
-
-	self.search = ko.computed(function() {
+    self.search = ko.computed(function() {
     	return ko.utils.arrayFilter(self.locations(), function(location) {
     		return location.title().toLowerCase().indexOf(self.query().toLowerCase()) >= 0;
-        });
+    	});
+    });
+    self.search.subscribe( function() {
+    	setVisibilty(self.search());
     });
 
-    self.search.subscribe( function() {
-        setVisibilty(self.search());
-    });
 }
 
-var wikiRequestTimeout = setTimeout(function(){
-	alert("Error");
-}, 8000);
+
 
 /* Load wikipedia Info */
 
- function wikiInfoRequest(loc) {
-	var _url = "https://es.wikipedia.org/w/api.php?action=opensearch&search="+loc.title()+"&format=json&callback=wikiCallback";
-	$.ajax({
-  		url: _url,
-  		dataType: "jsonp",
-		success: function(res){
-				loc.description(res[2][0]);
-				console.log(res[2][0]);
-				loc.urlinfo(res[3][0]);
-				clearTimeout(wikiRequestTimeout);
-				console.log(res[3][0]);
-		}
-	});
+function wikiInfoRequest(loc) {
+    var _url = "https://es.wikipedia.org/w/api.php?action=opensearch&search="+loc.title()+"&format=json&callback=wikiCallback";
+    var wikiRequestTimeout = setTimeout( function() {
+    	alert("Wikipedia Error");
+    }, 8000);
+    $.ajax({
+    	url: _url,
+    	dataType: "jsonp",
+    	success: function(res){
+    		loc.description(res[2][0]);
+    		loc.urlinfo(res[3][0]);
+    	    loadLocImg(loc, loc.request());
+    	    clearTimeout(wikiRequestTimeout);
+    	}
+    });
 }
 
 /* Load images from Google Maps API and generates markers */
@@ -160,30 +155,26 @@ function loadLocImg(loc,request) {
 							        	'<p>'+loc.description()+'</p>'+
 							        '</div>'+
 							   '</div>');
-		}
-
-		else {
-			loc.img_small('img/error.png');
-			loc.contentString('<h1>Error retrieving location info</h1>');
-		}
-
-		loc.infowindow = new google.maps.InfoWindow({
-	    		content: loc.contentString()
-	    });
-
-    	loc.marker = new google.maps.Marker({
-    		position: loc.latlng(),
-    		map: map,
-    		title: loc.title(),
-    		animation: google.maps.Animation.DROP
-  		});
-
-		loc.marker.addListener("click", function(){
-			loc.infowindow.open(map, this);
-			toggleAnimation(this);
-		});
-		markers.push(loc.marker);
-	});
+        }
+        else {
+        	loc.img_small('img/error.png');
+        	loc.contentString('<h1>Error retrieving location info</h1>');
+        }
+        loc.infowindow = new google.maps.InfoWindow({
+        	content: loc.contentString()
+        });
+        loc.marker = new google.maps.Marker({
+        	position: loc.latlng(),
+            map: map,
+    	    title: loc.title(),
+    	    animation: google.maps.Animation.DROP
+        });
+        loc.marker.addListener("click", function(){
+            loc.infowindow.open(map, this);
+            toggleAnimation(this);
+        });
+        markers.push(loc.marker);
+    });
 }
 
 /* Handle markers visibility depending on search */
