@@ -15,6 +15,7 @@ function initMap() {
     	center: {lat: 40.425884, lng: -3.68783},
    		zoom: 12
   	});
+
   	infowindow = new google.maps.InfoWindow;
   	ko.applyBindings(new ViewModel());
 }
@@ -87,11 +88,13 @@ var ViewModel = function () {
 
 	self.types = ko.observableArray();
 
-	for (var i = 1; i <= Object.keys(types).length; i++){
+	for (var i = 1; i <= Object.keys(types).length; i++) {
 		self.types.push(types[i]);
 	}
 
 	self.currentLoc = ko.observable(self.locations()[0]);
+
+	/* Update information and open infowindow */
 
 	self.updateInfoWindow = function(loc){
 		self.currentLoc(loc);
@@ -110,14 +113,14 @@ var ViewModel = function () {
         });
     });
 
-    self.search.subscribe(function() {
+    self.search.subscribe( function() {
         setVisibilty(self.search());
     });
-};
+}
 
 /* Load wikipedia Info */
 
- function wikiInfoRequest(loc){
+ function wikiInfoRequest(loc) {
 	var _url = "https://es.wikipedia.org/w/api.php?action=opensearch&search="+loc.title()+"&format=json&callback=wikiCallback";
 	$.ajax({
   		url: _url,
@@ -132,11 +135,10 @@ var ViewModel = function () {
 
 /* Load images from Google Maps API and generates markers */
 
-function loadLocImg(loc,request){
+function loadLocImg(loc,request) {
 	var service = new google.maps.places.PlacesService(map);
 	service.textSearch(request, function(res){
 		if (res){
-			console.log(res[0]);
 			var url_small = res[0].photos[0].getUrl({'maxWidth': 200, 'maxHeight': 200});
 			var url_large = res[0].photos[0].getUrl({'maxWidth': 400, 'maxHeight': 400});
 			loc.img_small(url_small);
@@ -157,7 +159,7 @@ function loadLocImg(loc,request){
 		else {
 			loc.img_small('img/error.png');
 			loc.contentString('<h1>Error retrieving location info</h1>');
-		};
+		}
 
 		loc.infowindow = new google.maps.InfoWindow({
 	    		content: loc.contentString()
@@ -173,7 +175,7 @@ function loadLocImg(loc,request){
 		loc.marker.addListener("click", function(){
 			loc.infowindow.open(map, this);
 			toggleAnimation(this);
-		})
+		});
 		markers.push(loc.marker);
 	});
 }
@@ -194,6 +196,8 @@ var setVisibilty = function(filteredLocations) {
         }
     }
 }
+
+/* Add animation on markers*/
 
 function toggleAnimation(marker) {
   if (marker.getAnimation() !== null) {

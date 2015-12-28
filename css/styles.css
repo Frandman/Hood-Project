@@ -10,7 +10,7 @@ ul {
 	padding: 0;
 }
 
-#locations > li {
+.locations > li {
 	list-style-type: none;
 	margin-bottom: 1em;
 	background-color: rgba(191, 187, 187, 0.08);
@@ -25,7 +25,7 @@ footer {
 	margin-top: 4%;
 }
 
-#content {
+.content {
 	padding: 1em;
 }
 
