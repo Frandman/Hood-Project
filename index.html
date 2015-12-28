@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Awesome</title>
+		<title>MAD Locations</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">		<link rel="stylesheet"  href="css/styles.css">
 		<link rel="stylesheet"  href="css/bootstrap.min.css">
@@ -10,14 +10,14 @@
 	<body>
 		<div class="container">
 			<div class="row">
-				<div id="header" class="col-xs-12">
+				<div class="header" class="col-xs-12">
 					<h1>MY FAVOURITE MADRID LOCATIONS</h1>
 				</div>
 			</div>
 			<div class="search row">
 				<div class="col-xs-12">
         			<form role="search">
-          				<input id="search-box" type="search" data-bind="textInput: query, valueUpdate: 'keyup'" placeholder="Enter Search"></input>
+          				<input class="search-box" type="search" data-bind="textInput: query, valueUpdate: 'keyup'" placeholder="Enter Search"></input>
         			</form>
         		</div>
       		</div>
@@ -29,7 +29,8 @@
          				</ul>
        				</div>
 				</div>
-				<div id="map" class="col-sm-8"></div>
+				<div id="map" class="col-sm-8">
+				</div>
 			</div>
 			<div id="info-window" class="row">
 				<div class"col-xs-12">
@@ -38,15 +39,16 @@
 					<div id="description">
 						<span data-bind="text: currentLoc().description"></span>
 					</div>
-						<img class="img-responsive" data-bind="attr: { src: currentLoc().img_url }">
+					<img class="img-responsive" data-bind="attr: { src: currentLoc().img_large }">
+					<div class="infolink">
+						<button class="btn btn-default"><a target="_new" data-bind="attr: { href: currentLoc().urlinfo }" > more info </a></button>
+					</div>
 					</div>
 				</div>
 
 			</div>
 			<div class="row">
-				<div class="col-xs-12 col-xs-offset-1">
-					<iframe data-bind="attr: { src: currentLoc().urlinfo }"></iframe>
-				</div>
+
 			</div>
 	    <footer>
 	    	<div class="row">

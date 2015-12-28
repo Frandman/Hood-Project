@@ -13,7 +13,7 @@ var locationsData;
 function initMap() {
   		map = new google.maps.Map(document.getElementById('map'), {
     	center: {lat: 40.425884, lng: -3.68783},
-   		zoom: 13
+   		zoom: 12
   	});
   	infowindow = new google.maps.InfoWindow;
   	ko.applyBindings(new ViewModel());
@@ -30,7 +30,8 @@ function Loc (data) {
 	self.type = ko.observable(types[data.type]);
 	self.description = ko.observable();
 	self.urlinfo = ko.observable();
-	self.img_url = ko.observable();
+	self.img_small = ko.observable();
+	self.img_large = ko.observable();
 	self.map = map;
 	self.contentString = ko.observable();
 	wikiInfoRequest(self);
@@ -58,18 +59,18 @@ locationsData =[
 	},
 
 	{'type': '3',
-	 'name': 'Puerta del Sol',
-	 'latlng':{lat: 40.4169473, lng: -3.7035285}
-	},
-
-	{'type': '3',
-	 'name': 'Faro Moncloa',
+	 'name': 'Estación de Atocha',
 	 'latlng':{lat: 40.4372767, lng: -3.7237375}
 	},
 
 	{'type': '3',
-	 'name': 'Parque de el Retiro',
-	 'latlng':{lat: 40.4152606, lng: -3.6866935}
+	 'name': 'Museo del romanticismo',
+	 'latlng':{lat: 40.4259033, lng: -3.70096}
+	},
+
+	{'type': '3',
+	 'name': 'Plaza de Castilla',
+	 'latlng':{lat: 40.4657783, lng: -3.6908562}
 	},
 ];
 
@@ -99,6 +100,8 @@ var ViewModel = function () {
 		}
 		infowindow.setContent(loc.contentString());
 		infowindow.open(map, loc.marker);
+		toggleAnimation(loc.marker);
+
 	}
 
 	self.search = ko.computed(function() {
@@ -120,16 +123,10 @@ var ViewModel = function () {
   		url: _url,
   		dataType: "jsonp"
 		}).done(function(res){
-			if(res[2][0]) {
 				loc.description(res[2][0]);
 				loc.urlinfo(res[3][0]);
-			}
-
-			else {
-				loc.description('Unable to retrieve wikipedia information');
-			}
-	}).fail(function() {
-    alert( "error" );
+		}).fail(function() {
+    			loc.description("wikipedia");
   });
 }
 
@@ -139,14 +136,17 @@ function loadLocImg(loc,request){
 	var service = new google.maps.places.PlacesService(map);
 	service.textSearch(request, function(res){
 		if (res){
-			var url = res[0].photos[0].getUrl({'maxWidth': 200, 'maxHeight': 200});
-			loc.img_url(url);
+			console.log(res[0]);
+			var url_small = res[0].photos[0].getUrl({'maxWidth': 200, 'maxHeight': 200});
+			var url_large = res[0].photos[0].getUrl({'maxWidth': 400, 'maxHeight': 400});
+			loc.img_small(url_small);
+			loc.img_large(url_large);
 			loc.contentString('<div class="container infowindow">'+
 									'<div class="row iw-title">'+
 							       		'<h1>'+loc.title()+'</h1>'+
 							       	'</div>'+
 							       	'<div class="row">'+
-							        	'<img class="img-responsive" src="'+url+'">'+
+							        	'<img class="img-responsive" src="'+url_small+'">'+
 							        '</div>'+
 							        '<div class="row iw-description">'+
 							        	'<p>'+loc.description()+'</p>'+
@@ -155,7 +155,7 @@ function loadLocImg(loc,request){
 		}
 
 		else {
-			loc.img_url('img/error.png');
+			loc.img_small('img/error.png');
 			loc.contentString('<h1>Error retrieving location info</h1>');
 		};
 
@@ -166,12 +166,13 @@ function loadLocImg(loc,request){
     	loc.marker = new google.maps.Marker({
     		position: loc.latlng(),
     		map: map,
-    		title: loc.title()
+    		title: loc.title(),
+    		animation: google.maps.Animation.DROP
   		});
 
 		loc.marker.addListener("click", function(){
-			loc.infowindow.open(map, loc.marker);
-			this.setAnimation(google.maps.Animation.BOUNCE);
+			loc.infowindow.open(map, this);
+			toggleAnimation(this);
 		})
 		markers.push(loc.marker);
 	});
@@ -192,7 +193,15 @@ var setVisibilty = function(filteredLocations) {
             }
         }
     }
-};
+}
+
+function toggleAnimation(marker) {
+  if (marker.getAnimation() !== null) {
+    marker.setAnimation(null);
+  } else {
+    marker.setAnimation(google.maps.Animation.DROP);
+  }
+}
 
 
 

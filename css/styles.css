@@ -16,7 +16,7 @@ ul {
 	background-color: rgba(191, 187, 187, 0.08);
 	font-weight: 700;
 }
-#header {
+.header {
 	margin-bottom: 2%;
 }
 
@@ -52,8 +52,9 @@ footer {
 	margin-top: 5%;
 }
 
-iframe {
-	width: 80%;
+.infolink {
+	text-align: center;
+	margin-top: 3%;
 }
 
 @media screen and (max-width: 780px) {
