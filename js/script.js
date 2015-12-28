@@ -1,6 +1,13 @@
+
+'use strict'
+
+/* Variable initialization */
+
 var map;
 var infowindow;
 var markers=[];
+var locationsData;
+
 /* Map Loader Function */
 
 function initMap() {
@@ -27,7 +34,7 @@ function Loc (data) {
 	self.map = map;
 	self.contentString = ko.observable();
 	wikiInfoRequest(self);
-	request = {};
+	var request = {};
 	request.query = data.name;
 	loadLocImg(self, request);
 }
@@ -36,7 +43,7 @@ function Loc (data) {
 
 var types ={'1':'Museum','2':'Building','3':'Square'};
 
-/* Data */
+/* Hardcoded Data */
 
 locationsData =[
 
@@ -85,7 +92,7 @@ var ViewModel = function () {
 
 	self.currentLoc = ko.observable(self.locations()[0]);
 
-	updateInfoWindow = function(loc){
+	self.updateInfoWindow = function(loc){
 		self.currentLoc(loc);
 		if (infowindow){
 			infowindow.close();
@@ -107,8 +114,8 @@ var ViewModel = function () {
 
 /* Load wikipedia Info */
 
-wikiInfoRequest = function (loc){
-	_url = "https://es.wikipedia.org/w/api.php?action=opensearch&search="+loc.title()+"&format=json&callback=wikiCallback";
+ function wikiInfoRequest(loc){
+	var _url = "https://es.wikipedia.org/w/api.php?action=opensearch&search="+loc.title()+"&format=json&callback=wikiCallback";
 	$.ajax({
   		url: _url,
   		dataType: "jsonp"
@@ -116,22 +123,23 @@ wikiInfoRequest = function (loc){
 			if(res[2][0]) {
 				loc.description(res[2][0]);
 				loc.urlinfo(res[3][0]);
-				console.log(res);
 			}
 
 			else {
 				loc.description('Unable to retrieve wikipedia information');
 			}
-	});
+	}).fail(function() {
+    alert( "error" );
+  });
 }
 
-/* Load Images from Google Maps API */
+/* Load images from Google Maps API and generates markers */
 
 function loadLocImg(loc,request){
 	var service = new google.maps.places.PlacesService(map);
 	service.textSearch(request, function(res){
 		if (res){
-			url = res[0].photos[0].getUrl({'maxWidth': 200, 'maxHeight': 200});
+			var url = res[0].photos[0].getUrl({'maxWidth': 200, 'maxHeight': 200});
 			loc.img_url(url);
 			loc.contentString('<div class="container infowindow">'+
 									'<div class="row iw-title">'+
@@ -169,6 +177,7 @@ function loadLocImg(loc,request){
 	});
 }
 
+/* Handle markers visibility depending on search */
 
 var setVisibilty = function(filteredLocations) {
     for (var i = 0; i < markers.length; i++) {

@@ -6,9 +6,6 @@
 		<meta charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="css/styles.css">
 		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-		<script type="text/javascript" src="js/jquery.min.js"></script>
-		<script type="text/javascript" src="js/bootstrap.min.js"></script>
-		<script type="text/javascript" src="js/knockout-3.4.0.js"></script>
 	</head>
 	<body>
 		<div class="container">
@@ -28,7 +25,7 @@
 				<div id="locations-list" class="col-sm-3">
        				<div class="list">
           				<ul id="locations" data-bind="foreach: search()">
-            				<li data-bind="text: title, click: updateInfoWindow"></li>
+            				<li data-bind="text: title, click: $root.updateInfoWindow"></li>
          				</ul>
        				</div>
 				</div>
@@ -58,6 +55,9 @@
 	    		</div>
 	    	</div>
 	    </footer>
+	    <script type="text/javascript" src="js/jquery.min.js"></script>
+		<script type="text/javascript" src="js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/knockout-3.4.0.js"></script>
 	    <script async defer
 	      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDfr-U34sxOCt5uvZ51YdGrBcU1C2Va3KE&libraries=places&callback=initMap">
 	    </script>
