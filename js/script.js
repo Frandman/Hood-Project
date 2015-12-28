@@ -118,19 +118,25 @@ var ViewModel = function () {
     });
 }
 
+var wikiRequestTimeout = setTimeout(function(){
+	alert("Error");
+}, 8000);
+
 /* Load wikipedia Info */
 
  function wikiInfoRequest(loc) {
 	var _url = "https://es.wikipedia.org/w/api.php?action=opensearch&search="+loc.title()+"&format=json&callback=wikiCallback";
 	$.ajax({
   		url: _url,
-  		dataType: "jsonp"
-		}).done(function(res){
+  		dataType: "jsonp",
+		success: function(res){
 				loc.description(res[2][0]);
+				console.log(res[2][0]);
 				loc.urlinfo(res[3][0]);
-		}).fail(function() {
-    			loc.description("wikipedia");
-  });
+				clearTimeout(wikiRequestTimeout);
+				console.log(res[3][0]);
+		}
+	});
 }
 
 /* Load images from Google Maps API and generates markers */
