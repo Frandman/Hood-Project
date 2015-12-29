@@ -47,22 +47,22 @@ var types = {'1':'Museum','2':'Building','3':'Square'};
 
 locationsData =[
 
-    {'type': '1',
+    {'type': '2',
     'name': 'Torres de Colon',
     'latlng':{lat: 40.4255386, lng: -3.6931735}
     },
 
-    {'type': '2',
+    {'type': '1',
     'name': 'Museo del Prado',
     'latlng':{lat: 40.4137818, lng: -3.6943211}
     },
 
-    {'type': '3',
+    {'type': '2',
     'name': 'Estación de Atocha',
     'latlng':{lat: 40.4372767, lng: -3.7237375}
     },
 
-    {'type': '3',
+    {'type': '1',
     'name': 'Museo del romanticismo',
     'latlng':{lat: 40.4259033, lng: -3.70096}
     },
@@ -153,19 +153,21 @@ var ViewModel = function () {
         var service = new google.maps.places.PlacesService(map);
         service.textSearch(request, function(res){
             if (res){
-                var url_small = res[0].photos[0].getUrl({'maxWidth': 200, 'maxHeight': 200});
+                var url_small = res[0].photos[0].getUrl({'maxWidth': 100, 'maxHeight': 100});
                 var url_large = res[0].photos[0].getUrl({'maxWidth': 400, 'maxHeight': 400});
                 loc.img_small(url_small);
                 loc.img_large(url_large);
                 loc.contentString('<div class="container infowindow">'+
                                         '<div class="row iw-title">'+
-                                            '<h1>'+loc.title()+'</h1>'+
+                                            '<h4>'+loc.title()+'</h4>'+
                                         '</div>'+
                                         '<div class="row">'+
                                             '<img class="img-responsive" src="'+url_small+'">'+
                                         '</div>'+
                                         '<div class="row iw-description">'+
-                                            '<p>'+loc.description()+'</p>'+
+                                            '<div class="col-xs-8 col-xs-offset-2">'+
+                                                '<p>'+loc.description()+'</p>'+
+                                            '</div>'+
                                         '</div>'+
                                    '</div>');
             }
@@ -176,10 +178,21 @@ var ViewModel = function () {
             loc.infowindow = new google.maps.InfoWindow({
                 content: loc.contentString()
             });
+            var icon = 'images/square.png';
+            console.log(loc.type());
+            switch(loc.type()){
+                case 'Museum':
+                    icon = 'images/museum.png';
+                    break;
+                case 'Building':
+                    icon = 'images/building.png';
+                    break;
+            }
             loc.marker = new google.maps.Marker({
                 position: loc.latlng(),
                 map: map,
                 title: loc.title(),
+                icon: icon,
                 animation: google.maps.Animation.DROP
             });
             loc.marker.addListener("click", function(){

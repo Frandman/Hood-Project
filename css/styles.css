@@ -44,12 +44,13 @@ footer {
 }
 
 .container.infowindow {
-	width: 400px;
+	max-width: 400px;
     text-align: center;
 }
 
 .row.iw-description {
 	margin-top: 5%;
+	text-align: center;
 }
 
 .infolink {
